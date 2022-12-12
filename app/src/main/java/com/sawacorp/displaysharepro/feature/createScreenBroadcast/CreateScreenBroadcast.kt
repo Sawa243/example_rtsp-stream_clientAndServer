@@ -14,6 +14,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.pedro.rtsp.utils.ConnectCheckerRtsp
 import com.sawacorp.displaysharepro.databinding.FragmentCreateScreenBroadcastBinding
@@ -46,15 +49,24 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.myIp.observe(this.viewLifecycleOwner) {
-            binding.myIp.text = "My IP: $it"
-        }
 
-        viewModel.myAccessToken.observe(this.viewLifecycleOwner) {
-            if (it.isNotEmpty()) {
-                binding.shareScreenButton.isEnabled = true
+        viewLifecycleOwner.lifecycleScope.launch {
+
+            viewModel.myIp.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    binding.myIp.text = "My IP: $it"
+                }
+
+            viewModel.myAccessToken.flowWithLifecycle(
+                viewLifecycleOwner.lifecycle,
+                Lifecycle.State.STARTED
+            ).collect {
+                if (it.isNotEmpty()) {
+                    binding.shareScreenButton.isEnabled = true
+                }
+                binding.myToken.text = "My token: $it"
             }
-            binding.myToken.text = "My token: $it"
+
         }
 
         binding.connectButton.setOnClickListener {

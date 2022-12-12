@@ -1,6 +1,5 @@
 package com.sawacorp.displaysharepro.feature.connectToBroadcast
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,12 +7,13 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.sawacorp.displaysharepro.databinding.FragmentConnectToBroadcastBinding
+import com.sawacorp.displaysharepro.getMyIpV4Ip
 import dagger.hilt.android.AndroidEntryPoint
-import java.net.Inet4Address
-import java.net.InetAddress
-import java.net.NetworkInterface
-import java.util.*
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ConnectToBroadcast : Fragment() {
@@ -40,37 +40,29 @@ class ConnectToBroadcast : Fragment() {
     }
 
     private fun initData() {
-        binding.myIp.text = "Server IP：$localIPAddress:${viewModel.port}"
-        viewModel.connectionCode.observe(this.viewLifecycleOwner) {
-            val code = it.joinToString("")
+        binding.myIp.text = "Server IP：${getMyIpV4Ip()}:${viewModel.port}"
 
-            binding.connectionCode.text = "Connection code: $code"
-            viewModel.startHttpServer(code)
-        }
+        viewLifecycleOwner.lifecycleScope.launch {
 
-        viewModel.rtspString.observe(this.viewLifecycleOwner) {
-            Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
-            val uri = Uri.parse(it)
-            val svVideo = binding.streamVideo
-            svVideo.init(uri, "", "")
-            svVideo.start(requestVideo = true, requestAudio = false)
-        }
-    }
-
-    private val localIPAddress: String by lazy {
-
-        val en: Enumeration<NetworkInterface> = NetworkInterface.getNetworkInterfaces()
-        while (en.hasMoreElements()) {
-            val intf: NetworkInterface = en.nextElement()
-            val enumIpAddr: Enumeration<InetAddress> = intf.inetAddresses
-            while (enumIpAddr.hasMoreElements()) {
-                val inetAddress: InetAddress = enumIpAddr.nextElement()
-                if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
-                    return@lazy inetAddress.hostAddress?.toString() ?: ""
+            viewModel.connectionCode.flowWithLifecycle(
+                viewLifecycleOwner.lifecycle,
+                Lifecycle.State.STARTED
+            ).collect {
+                    val code = it.joinToString("")
+                    binding.connectionCode.text = "Connection code: $code"
+                    viewModel.startHttpServer(code)
                 }
+
+            viewModel.rtspString.flowWithLifecycle(
+                viewLifecycleOwner.lifecycle,
+                Lifecycle.State.STARTED
+            ).collect { rtsp ->
+                Toast.makeText(requireContext(), rtsp, Toast.LENGTH_LONG).show()
+                viewModel.initSurfaceView(binding.streamVideo, rtsp)
             }
+
         }
-        "null"
+
     }
 
     override fun onDestroyView() {
