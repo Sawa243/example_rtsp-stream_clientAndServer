@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph.xml"
+    app:startDestination="@id/startFragment">
+
+    <fragment
+        android:id="@+id/startFragment"
+        android:name="com.sawacorp.displaysharepro.feature.startPage.StartFragment"
+        android:label="fragment_start"
+        tools:layout="@layout/fragment_start">
+        <action
+            android:id="@+id/action_startFragment_to_createScreenBroadcast"
+            app:destination="@id/createScreenBroadcast" />
+        <action
+            android:id="@+id/action_startFragment_to_connectToBroadcast"
+            app:destination="@id/connectToBroadcast" />
+    </fragment>
+    <fragment
+        android:id="@+id/connectToBroadcast"
+        android:name="com.sawacorp.displaysharepro.feature.connectToBroadcast.ConnectToBroadcast"
+        android:label="fragment_connect_to_broadcast"
+        tools:layout="@layout/fragment_connect_to_broadcast" />
+    <fragment
+        android:id="@+id/createScreenBroadcast"
+        android:name="com.sawacorp.displaysharepro.feature.createScreenBroadcast.CreateScreenBroadcast"
+        android:label="fragment_create_screen_broadcast"
+        tools:layout="@layout/fragment_create_screen_broadcast" />
+</navigation>
