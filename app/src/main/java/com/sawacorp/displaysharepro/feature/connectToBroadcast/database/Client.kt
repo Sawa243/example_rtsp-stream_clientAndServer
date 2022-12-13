@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 data class Client(
     @ColumnInfo(name = "device") val device: String?,
     @ColumnInfo(name = "token") val token: String?,
-){
-    @PrimaryKey(autoGenerate = true) var id: Long = 0
+) {
+    @PrimaryKey(autoGenerate = true)
+    var id: Long = 0
 }

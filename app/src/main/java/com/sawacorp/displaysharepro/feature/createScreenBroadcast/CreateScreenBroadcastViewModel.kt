@@ -18,7 +18,22 @@ class CreateScreenBroadcastViewModel @Inject constructor() : ViewModel() {
 
     val myIp: MutableStateFlow<String> = MutableStateFlow(getMyIpV4Ip())
     val myAccessToken: MutableStateFlow<String> = MutableStateFlow("")
+    val mapDevice = mutableMapOf<String, String>()
     private var myAccessUrl = ""
+
+    fun getListDevice() {
+        val mask = deleteSymbolsAfterLastDot(myIp.value)
+        for (i in 1..255) {
+            val url = "http://$mask.$i:8080/getName"
+            val requestJson = ""
+            viewModelScope.launch {
+                val response = postRequest(url, requestJson) ?: ""
+                if (response.isNotEmpty()) {
+                    mapDevice["http://$mask.$i:8080"] = response
+                }
+            }
+        }
+    }
 
     fun connect(code: String) {
         val mask = deleteSymbolsAfterLastDot(myIp.value)
@@ -34,7 +49,7 @@ class CreateScreenBroadcastViewModel @Inject constructor() : ViewModel() {
                         Gson()
                             .fromJson(response, ConnectResponse::class.java)?.let { client ->
                                 if (client.token?.isNotEmpty() == true) {
-                                    myAccessToken.emit(client.token ?: "")
+                                    myAccessToken.value = client.token
                                 }
                             }
                     } catch (e: Exception) {
@@ -50,7 +65,7 @@ class CreateScreenBroadcastViewModel @Inject constructor() : ViewModel() {
         val requestJson =
             "{\"rtsp\": \"$rtspUrl\"}"
         viewModelScope.launch {
-            val response = postRequest(url, requestJson, myAccessToken.value ?: "") ?: ""
+            val response = postRequest(url, requestJson, myAccessToken.value) ?: ""
             if (response.isNotEmpty()) {
                 try {
 

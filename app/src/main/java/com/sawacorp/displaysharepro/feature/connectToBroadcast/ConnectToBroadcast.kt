@@ -13,6 +13,8 @@ import androidx.lifecycle.lifecycleScope
 import com.sawacorp.displaysharepro.databinding.FragmentConnectToBroadcastBinding
 import com.sawacorp.displaysharepro.getMyIpV4Ip
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -40,26 +42,29 @@ class ConnectToBroadcast : Fragment() {
     }
 
     private fun initData() {
-        binding.myIp.text = "Server IP：${getMyIpV4Ip()}:${viewModel.port}"
+        binding.myIp.text = "Сервер IP：${getMyIpV4Ip()}:${viewModel.port}"
 
         viewLifecycleOwner.lifecycleScope.launch {
 
             viewModel.connectionCode.flowWithLifecycle(
                 viewLifecycleOwner.lifecycle,
                 Lifecycle.State.STARTED
-            ).collect {
-                    val code = it.joinToString("")
-                    binding.connectionCode.text = "Connection code: $code"
-                    viewModel.startHttpServer(code)
-                }
+            ).onEach {
+                val code = it.joinToString("")
+                binding.connectionCode.text = "Код для соединения: $code"
+                viewModel.startHttpServer(code)
+            }.launchIn(this)
 
-            viewModel.rtspString.flowWithLifecycle(
-                viewLifecycleOwner.lifecycle,
-                Lifecycle.State.STARTED
-            ).collect { rtsp ->
-                Toast.makeText(requireContext(), rtsp, Toast.LENGTH_LONG).show()
-                viewModel.initSurfaceView(binding.streamVideo, rtsp)
-            }
+            viewModel.rtspString
+                .flowWithLifecycle(
+                    viewLifecycleOwner.lifecycle,
+                    Lifecycle.State.STARTED
+                )
+                .onEach { rtsp ->
+                    Toast.makeText(requireContext(), rtsp, Toast.LENGTH_LONG).show()
+                    viewModel.initSurfaceView(binding.streamVideo, rtsp)
+                }
+                .launchIn(this)
 
         }
 

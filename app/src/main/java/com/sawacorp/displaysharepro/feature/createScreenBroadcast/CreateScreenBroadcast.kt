@@ -21,6 +21,8 @@ import androidx.lifecycle.viewModelScope
 import com.pedro.rtsp.utils.ConnectCheckerRtsp
 import com.sawacorp.displaysharepro.databinding.FragmentCreateScreenBroadcastBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -52,20 +54,25 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
 
         viewLifecycleOwner.lifecycleScope.launch {
 
-            viewModel.myIp.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-                .collect {
-                    binding.myIp.text = "My IP: $it"
+            viewModel.myIp
+                .flowWithLifecycle(
+                    viewLifecycleOwner.lifecycle,
+                    Lifecycle.State.STARTED
+                ).onEach {
+                    binding.myIp.text = "Мой IP: $it"
                 }
+                .launchIn(this)
 
-            viewModel.myAccessToken.flowWithLifecycle(
-                viewLifecycleOwner.lifecycle,
-                Lifecycle.State.STARTED
-            ).collect {
-                if (it.isNotEmpty()) {
-                    binding.shareScreenButton.isEnabled = true
-                }
-                binding.myToken.text = "My token: $it"
-            }
+            viewModel.myAccessToken
+                .flowWithLifecycle(
+                    viewLifecycleOwner.lifecycle,
+                    Lifecycle.State.STARTED
+                ).onEach {
+                    if (it.isNotEmpty()) {
+                        binding.shareScreenButton.isEnabled = true
+                        binding.myToken.text = "Мой токен: $it"
+                    }
+                }.launchIn(this)
 
         }
 
@@ -82,8 +89,9 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
             requireActivity().startService(Intent(requireContext(), DisplayService::class.java))
         }
         binding.shareScreenButton.text =
-            if (displayService != null && displayService.isStreaming()) "Stop share screen" else "Start share screen"
+            if (displayService != null && displayService.isStreaming()) "Остановить трансляцию" else "Поделиться экраном"
 
+        viewModel.getListDevice()
     }
 
     override fun onDestroyView() {
@@ -125,10 +133,10 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
         if (displayService != null) {
             if (!displayService.isStreaming()) {
                 startActivityForResult(displayService.sendIntent()!!, REQUEST_CODE_STREAM)
-                binding.shareScreenButton.text = "Stop share screen"
+                binding.shareScreenButton.text = "Остановить трансляцию"
             } else {
                 displayService.stopStream()
-                binding.shareScreenButton.text = "Start share screen"
+                binding.shareScreenButton.text = "Поделиться экраном"
             }
         }
     }
@@ -165,7 +173,7 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
             Toast.makeText(requireContext(), "Connection failed. $reason", Toast.LENGTH_SHORT)
                 .show()
             DisplayService.INSTANCE?.stopStream()
-            binding.shareScreenButton.text = "Start share screen"
+            binding.shareScreenButton.text = "Поделиться экраном"
         }
     }
 

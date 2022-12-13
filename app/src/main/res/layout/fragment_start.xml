@@ -15,14 +15,14 @@
             android:id="@+id/btn_create_shared"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="create share" />
+            android:text="@string/connect_to_stream" />
 
         <Button
             android:id="@+id/btn_connect_shared"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:text="connect share" />
+            android:text="@string/create_stream" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 

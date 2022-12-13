@@ -11,6 +11,7 @@ import com.sawacorp.displaysharepro.feature.connectToBroadcast.database.Client
 import com.sawacorp.displaysharepro.feature.connectToBroadcast.database.ClientDao
 import com.sawacorp.displaysharepro.feature.connectToBroadcast.entity.ConnectRequest
 import com.sawacorp.displaysharepro.feature.connectToBroadcast.entity.RTSPRequest
+import com.sawacorp.displaysharepro.getMyDeviceName
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import kotlinx.coroutines.CoroutineScope
@@ -26,8 +27,8 @@ fun startHttpServer(
 ) {
 
     androidServer
-        .get("/hello") { _, response: Response ->
-            response.setBodyText("hello world")
+        .get("/getName") { _, response: Response ->
+            response.setBodyText(getMyDeviceName())
         }
         .post("/connect") { request, response: Response ->
             createClient(request, clientDao, connectionCode, response, viewModelScope)
