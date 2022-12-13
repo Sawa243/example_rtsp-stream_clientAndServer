@@ -17,18 +17,6 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="My ip:" />
 
-    <SurfaceView
-        android:id="@+id/surfaceView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginBottom="10dp"
-        android:elevation="5dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/share_screen_button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <TextView
         android:id="@+id/my_token"
         android:layout_width="wrap_content"
@@ -40,11 +28,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/my_ip" />
 
-    <EditText
+    <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/input_code"
         android:layout_margin="64dp"
         android:inputType="number"
         android:maxLength="6"
+        android:hint="В веди код здесь"
+        android:gravity="center"
+        android:textColorHint="@color/black"
         android:textColor="@color/black"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -67,8 +58,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="64dp"
-        android:enabled="false"
-        android:textColor="@color/black"
+        android:visibility="gone"
         android:text="Поделиться экраном"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -140,7 +140,7 @@ class DisplayService : Service() {
     fun startStream(callback: (String) -> Unit) {
         if (rtspServerDisplay?.isStreaming != true) {
             val customSettingsVideo =
-                rtspServerDisplay?.prepareVideo(1920, 1080, 30, 3000 * 1024, 0, 90)
+                rtspServerDisplay?.prepareVideo()//TODO тут кастомные настройки видео
             val customSettingsAudio =
                 rtspServerDisplay?.prepareAudio() //TODO тут кастомные настройки звука
             if (customSettingsVideo == true && customSettingsAudio == true) {

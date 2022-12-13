@@ -23,7 +23,8 @@ fun startHttpServer(
     connectionCode: String,
     clientDao: ClientDao,
     viewModelScope: CoroutineScope,
-    onRtspUrl: (String) -> Unit
+    onRtspUrl: (String) -> Unit,
+    stopStream: () -> Unit
 ) {
 
     androidServer
@@ -50,8 +51,11 @@ fun startHttpServer(
                 response.setBodyText("invalid params")
             }
         }
-        .get("/test") { _, response: Response ->
-            response.html(context, "test")
+        .post("/stopStream") { request, response: Response ->
+            stopStream(request, connectionCode, response, stopStream)
+        }
+        .get("/testHTML") { _, response: Response ->
+            response.html(context, "testHTML")
         }
         .filter("/connect/*", object : HttpFilter {
             override fun before(request: Request): Boolean {
@@ -96,8 +100,23 @@ fun createClient(
         viewModelScope.launch { clientDao.insert(client) }
         response.setStatus(200)
         response.setBodyText(jsonWithSuccessToken(compactJws))
-
     }
 }
 
-
+fun stopStream(
+    request: Request,
+    code: String,
+    response: Response,
+    stopStream: () -> Unit
+): Response {
+    val requestBody = request.content()
+    val requestObject = Gson().fromJson(requestBody, ConnectRequest::class.java)
+    return if (requestObject.connectionCode != code) {
+        response.setStatus(400)
+        response.setBodyText("error")
+    } else {
+        stopStream()
+        response.setStatus(200)
+        response.setBodyText("ok")
+    }
+}

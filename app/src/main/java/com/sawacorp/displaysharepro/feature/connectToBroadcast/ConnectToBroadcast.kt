@@ -61,8 +61,23 @@ class ConnectToBroadcast : Fragment() {
                     Lifecycle.State.STARTED
                 )
                 .onEach { rtsp ->
-                    Toast.makeText(requireContext(), rtsp, Toast.LENGTH_LONG).show()
-                    viewModel.initSurfaceView(binding.streamVideo, rtsp)
+                    if (rtsp.isNotEmpty()) {
+                        Toast.makeText(requireContext(), rtsp, Toast.LENGTH_LONG).show()
+                        viewModel.initSurfaceView(binding.streamVideo, rtsp)
+                    }
+                }
+                .launchIn(this)
+            viewModel.stopStream
+                .flowWithLifecycle(
+                    viewLifecycleOwner.lifecycle,
+                    Lifecycle.State.STARTED
+                )
+                .onEach { stop ->
+                    if (stop) {
+                        binding.streamVideo.apply {
+                            stop() //TODO когда на той стороне нажали остановить трансляцию
+                        }
+                    }
                 }
                 .launchIn(this)
 

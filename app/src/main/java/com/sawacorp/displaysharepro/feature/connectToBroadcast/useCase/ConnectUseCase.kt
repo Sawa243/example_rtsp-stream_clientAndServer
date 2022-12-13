@@ -9,8 +9,9 @@ class ConnectUseCase @Inject constructor(
 ) {
     fun serverStart(
         connectionCode: String, coroutineScope: CoroutineScope,
-        onRtspUrl: (String) -> Unit
-    ) = repository.startServer(connectionCode, coroutineScope, onRtspUrl)
+        onRtspUrl: (String) -> Unit,
+        stopStream: () -> Unit
+    ) = repository.startServer(connectionCode, coroutineScope, onRtspUrl, stopStream)
 
     fun serverStop() {
         repository.serverStop()

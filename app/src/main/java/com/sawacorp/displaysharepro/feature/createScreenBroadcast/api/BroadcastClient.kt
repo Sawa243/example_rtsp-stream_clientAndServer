@@ -30,3 +30,25 @@ suspend fun postRequest(url: String, json: String, token: String = ""): String? 
             }
         })
     }
+
+suspend fun getRequest(url: String): String? =
+    suspendCoroutine { continuation ->
+
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(url)
+            .get()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                continuation.resume("") // or null
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    continuation.resume(response.body()?.string()) // resume calling coroutine
+                }
+            }
+        })
+    }

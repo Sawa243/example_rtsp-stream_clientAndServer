@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -69,7 +70,7 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
                     Lifecycle.State.STARTED
                 ).onEach {
                     if (it.isNotEmpty()) {
-                        binding.shareScreenButton.isEnabled = true
+                        binding.shareScreenButton.isVisible = true
                         binding.myToken.text = "Мой токен: $it"
                     }
                 }.launchIn(this)
@@ -136,6 +137,7 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
                 binding.shareScreenButton.text = "Остановить трансляцию"
             } else {
                 displayService.stopStream()
+                viewModel.stopStream()
                 binding.shareScreenButton.text = "Поделиться экраном"
             }
         }
@@ -173,6 +175,7 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
             Toast.makeText(requireContext(), "Connection failed. $reason", Toast.LENGTH_SHORT)
                 .show()
             DisplayService.INSTANCE?.stopStream()
+            viewModel.stopStream()
             binding.shareScreenButton.text = "Поделиться экраном"
         }
     }

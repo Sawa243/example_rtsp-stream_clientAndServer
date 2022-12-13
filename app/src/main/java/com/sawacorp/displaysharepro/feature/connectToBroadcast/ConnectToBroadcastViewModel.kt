@@ -20,6 +20,7 @@ class ConnectToBroadcastViewModel @Inject constructor(
     val port = 8080
     val connectionCode: MutableStateFlow<List<Int>> = MutableStateFlow(listOf())
     val rtspString: MutableStateFlow<String> = MutableStateFlow("")
+    val stopStream: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     init {
         val amplitudes = IntArray(6) { Random.nextInt(10 - 0) + 0 }.asList()
@@ -30,11 +31,15 @@ class ConnectToBroadcastViewModel @Inject constructor(
 
     fun startHttpServer(code: String) {
         if (!connectionWork) {
-            connectUseCase.serverStart(code, viewModelScope) { rtspUrl ->
+            connectUseCase.serverStart(code, viewModelScope, { rtspUrl ->
                 viewModelScope.launch {
                     rtspString.emit(rtspUrl)
                 }
-            }
+            }, {
+                viewModelScope.launch {
+                    stopStream.emit(true)
+                }
+            })
             connectionWork = true
         }
     }
@@ -42,7 +47,10 @@ class ConnectToBroadcastViewModel @Inject constructor(
     fun initSurfaceView(streamVideo: RtspSurfaceView, rtsp: String) {
         val uri = Uri.parse(rtsp)
         streamVideo.init(uri, "", "")
-        streamVideo.start(requestVideo = true, requestAudio = false)
+        streamVideo.start(requestVideo = true, requestAudio = true)
+        viewModelScope.launch {
+            stopStream.emit(false)
+        }
     }
 
     override fun onCleared() {

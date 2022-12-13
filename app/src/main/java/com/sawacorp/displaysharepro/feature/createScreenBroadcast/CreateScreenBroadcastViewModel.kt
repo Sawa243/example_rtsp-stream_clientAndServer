@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.sawacorp.displaysharepro.deleteSymbolsAfterLastDot
+import com.sawacorp.displaysharepro.feature.createScreenBroadcast.api.getRequest
 import com.sawacorp.displaysharepro.feature.createScreenBroadcast.api.postRequest
 import com.sawacorp.displaysharepro.feature.createScreenBroadcast.entity.ConnectResponse
 import com.sawacorp.displaysharepro.getMyDeviceName
@@ -20,14 +21,14 @@ class CreateScreenBroadcastViewModel @Inject constructor() : ViewModel() {
     val myAccessToken: MutableStateFlow<String> = MutableStateFlow("")
     val mapDevice = mutableMapOf<String, String>()
     private var myAccessUrl = ""
+    private var myAccessCode = ""
 
-    fun getListDevice() {
+    fun getListDevice() {                            //TODO: get list device from server
         val mask = deleteSymbolsAfterLastDot(myIp.value)
         for (i in 1..255) {
             val url = "http://$mask.$i:8080/getName"
-            val requestJson = ""
             viewModelScope.launch {
-                val response = postRequest(url, requestJson) ?: ""
+                val response = getRequest(url) ?: ""
                 if (response.isNotEmpty()) {
                     mapDevice["http://$mask.$i:8080"] = response
                 }
@@ -45,6 +46,7 @@ class CreateScreenBroadcastViewModel @Inject constructor() : ViewModel() {
                 val response = postRequest(url, requestJson) ?: ""
                 if (response.isNotEmpty()) {
                     myAccessUrl = "http://$mask.$i:8080"
+                    myAccessCode = code
                     try {
                         Gson()
                             .fromJson(response, ConnectResponse::class.java)?.let { client ->
@@ -66,6 +68,22 @@ class CreateScreenBroadcastViewModel @Inject constructor() : ViewModel() {
             "{\"rtsp\": \"$rtspUrl\"}"
         viewModelScope.launch {
             val response = postRequest(url, requestJson, myAccessToken.value) ?: ""
+            if (response.isNotEmpty()) {
+                try {
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    fun stopStream() {
+        val url = "$myAccessUrl/stopStream"
+        viewModelScope.launch {
+            val requestJson =
+                "{\"connectionCode\": \"$myAccessCode\", \"device\": \"${getMyDeviceName()}\"}"
+            val response = postRequest(url, requestJson) ?: ""
             if (response.isNotEmpty()) {
                 try {
 
