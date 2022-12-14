@@ -10,6 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
@@ -32,6 +34,7 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
     companion object {
         private val TAG = "CreateScreenBroadcast"
         private val REQUEST_CODE_STREAM = 1002
+        private val REQUEST_CODE = "REQUEST_CODE"
         private val PERMISSIONS = arrayOf(
             Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -104,22 +107,23 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
         _binding = null
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_STREAM && data != null) {
-            if (resultCode == AppCompatActivity.RESULT_OK) {
-                val displayService: DisplayService? = DisplayService.INSTANCE
-                if (displayService != null) {
-                    displayService.setIntentResult(resultCode, data)
-                    displayService.startStream {
-                        viewModel.startScreenShare(it)
+    private val startForFile: ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val requestCode = result.data?.extras?.getInt(REQUEST_CODE)
+            if (requestCode == REQUEST_CODE_STREAM && result.data != null) {
+                if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                    val displayService: DisplayService? = DisplayService.INSTANCE
+                    if (displayService != null) {
+                        displayService.setIntentResult(result.resultCode, result.data!!)
+                        displayService.startStream {
+                            viewModel.startScreenShare(it)
+                        }
                     }
                 }
+            } else {
+                Log.e(TAG, "get capture permission fail!")
             }
-        } else {
-            Log.e(TAG, "get capture permission fail!")
         }
-    }
 
     private fun startScreenShare() {
         if (!hasPermissions(requireContext(), *PERMISSIONS)) {
@@ -133,7 +137,11 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
         val displayService: DisplayService? = DisplayService.INSTANCE
         if (displayService != null) {
             if (!displayService.isStreaming()) {
-                startActivityForResult(displayService.sendIntent()!!, REQUEST_CODE_STREAM)
+                startForFile.launch(
+                    displayService.sendIntent()!!.apply {
+                        putExtra(REQUEST_CODE, REQUEST_CODE_STREAM)
+                    }
+                )
                 binding.shareScreenButton.text = "Остановить трансляцию"
             } else {
                 displayService.stopStream()
