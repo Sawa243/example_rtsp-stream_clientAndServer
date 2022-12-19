@@ -107,23 +107,49 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
         _binding = null
     }
 
-    private val startForFile: ActivityResultLauncher<Intent> =
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_STREAM && data != null) {
+            if (resultCode == AppCompatActivity.RESULT_OK) {
+                val displayService: DisplayService? = DisplayService.INSTANCE
+                if (displayService != null) {
+                    displayService.setIntentResult(resultCode, data)
+                    displayService.startStream(
+                        viewModel.widthConnectDevice,
+                        viewModel.heightConnectDevice
+                    ) {
+                        viewModel.startScreenShare(it)
+                    }
+                    binding.shareScreenButton.text = "Остановить трансляцию"
+                }
+            }
+        } else {
+            Log.e(TAG, "get capture permission fail!")
+        }
+    }
+
+    /*private val startForFile: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            val requestCode = result.data?.extras?.getInt(REQUEST_CODE)
+            val requestCode = result.data?.getIntExtra(REQUEST_CODE, 0)
             if (requestCode == REQUEST_CODE_STREAM && result.data != null) {
                 if (result.resultCode == AppCompatActivity.RESULT_OK) {
                     val displayService: DisplayService? = DisplayService.INSTANCE
                     if (displayService != null) {
                         displayService.setIntentResult(result.resultCode, result.data!!)
-                        displayService.startStream {
+                        displayService.startStream(
+                            viewModel.widthConnectDevice,
+                            viewModel.heightConnectDevice
+                        ) {
                             viewModel.startScreenShare(it)
                         }
+                        binding.shareScreenButton.text = "Остановить трансляцию"
                     }
                 }
             } else {
                 Log.e(TAG, "get capture permission fail!")
             }
-        }
+        }*/
 
     private fun startScreenShare() {
         if (!hasPermissions(requireContext(), *PERMISSIONS)) {
@@ -137,12 +163,10 @@ class CreateScreenBroadcast : Fragment(), ConnectCheckerRtsp {
         val displayService: DisplayService? = DisplayService.INSTANCE
         if (displayService != null) {
             if (!displayService.isStreaming()) {
-                startForFile.launch(
-                    displayService.sendIntent()!!.apply {
-                        putExtra(REQUEST_CODE, REQUEST_CODE_STREAM)
-                    }
-                )
-                binding.shareScreenButton.text = "Остановить трансляцию"
+                startActivityForResult(displayService.sendIntent()!!, REQUEST_CODE_STREAM)
+                /*val intent = displayService.sendIntent()!!
+                intent.putExtra(REQUEST_CODE, REQUEST_CODE_STREAM)
+                startForFile.launch(intent)*/
             } else {
                 displayService.stopStream()
                 viewModel.stopStream()

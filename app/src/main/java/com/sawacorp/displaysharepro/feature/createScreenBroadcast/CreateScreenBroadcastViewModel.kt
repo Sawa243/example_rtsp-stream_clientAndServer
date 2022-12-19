@@ -20,6 +20,8 @@ class CreateScreenBroadcastViewModel @Inject constructor() : ViewModel() {
     val myIp: MutableStateFlow<String> = MutableStateFlow(getMyIpV4Ip())
     val myAccessToken: MutableStateFlow<String> = MutableStateFlow("")
     val mapDevice = mutableMapOf<String, String>()
+    var widthConnectDevice: Int = 0
+    var heightConnectDevice: Int = 0
     private var myAccessUrl = ""
     private var myAccessCode = ""
 
@@ -52,6 +54,8 @@ class CreateScreenBroadcastViewModel @Inject constructor() : ViewModel() {
                             .fromJson(response, ConnectResponse::class.java)?.let { client ->
                                 if (client.token?.isNotEmpty() == true) {
                                     myAccessToken.value = client.token
+                                    widthConnectDevice = client.width ?: 320
+                                    heightConnectDevice = client.height ?: 640
                                 }
                             }
                     } catch (e: Exception) {

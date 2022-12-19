@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -137,10 +136,14 @@ class DisplayService : Service() {
         rtspServerDisplay?.glInterface?.setForceRender(true)
     }
 
-    fun startStream(callback: (String) -> Unit) {
+    fun startStream(width: Int, height: Int, callback: (String) -> Unit) {
         if (rtspServerDisplay?.isStreaming != true) {
             val customSettingsVideo =
-                rtspServerDisplay?.prepareVideo()//TODO тут кастомные настройки видео
+                rtspServerDisplay?.prepareVideo(
+                    width,
+                    height,
+                    width * height
+                )//TODO тут кастомные настройки видео
             val customSettingsAudio =
                 rtspServerDisplay?.prepareAudio() //TODO тут кастомные настройки звука
             if (customSettingsVideo == true && customSettingsAudio == true) {

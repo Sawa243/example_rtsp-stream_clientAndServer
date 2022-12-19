@@ -12,6 +12,8 @@ import com.sawacorp.displaysharepro.feature.connectToBroadcast.database.ClientDa
 import com.sawacorp.displaysharepro.feature.connectToBroadcast.entity.ConnectRequest
 import com.sawacorp.displaysharepro.feature.connectToBroadcast.entity.RTSPRequest
 import com.sawacorp.displaysharepro.getMyDeviceName
+import com.sawacorp.displaysharepro.getScreenHeight
+import com.sawacorp.displaysharepro.getScreenWidth
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import kotlinx.coroutines.CoroutineScope
@@ -75,8 +77,8 @@ fun jsonWithErrorCode(code: Int, message: String): String {
     return "{\"code\": $code, \"isSuccess\": false, \"message\": \"$message\"}"
 }
 
-fun jsonWithSuccessToken(token: String): String {
-    return "{\"code\": 200, \"isSuccess\": true, \"token\": \"$token\"}"
+fun jsonWithSuccessToken(token: String, width: Int, height: Int): String {
+    return "{\"code\": 200, \"isSuccess\": true, \"token\": \"$token\", \"width\": \"$width\", \"height\": \"$height\"}"
 }
 
 fun createClient(
@@ -99,7 +101,7 @@ fun createClient(
         val client = Client(device = requestObject.device, token = compactJws)
         viewModelScope.launch { clientDao.insert(client) }
         response.setStatus(200)
-        response.setBodyText(jsonWithSuccessToken(compactJws))
+        response.setBodyText(jsonWithSuccessToken(compactJws, getScreenWidth(), getScreenHeight()))
     }
 }
 

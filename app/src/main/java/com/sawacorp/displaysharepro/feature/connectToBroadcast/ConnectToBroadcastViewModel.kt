@@ -20,7 +20,7 @@ class ConnectToBroadcastViewModel @Inject constructor(
     val port = 8080
     val connectionCode: MutableStateFlow<List<Int>> = MutableStateFlow(listOf())
     val rtspString: MutableStateFlow<String> = MutableStateFlow("")
-    val stopStream: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val stopStream: MutableStateFlow<Boolean> = MutableStateFlow(true)
 
     init {
         val amplitudes = IntArray(6) { Random.nextInt(10 - 0) + 0 }.asList()
@@ -46,10 +46,52 @@ class ConnectToBroadcastViewModel @Inject constructor(
 
     fun initSurfaceView(streamVideo: RtspSurfaceView, rtsp: String) {
         val uri = Uri.parse(rtsp)
-        streamVideo.init(uri, "", "")
-        streamVideo.start(requestVideo = true, requestAudio = true)
+        streamVideo.apply {
+            init(uri, "", "")
+            setStatusListener(getRtspStatusListener())
+            start(requestVideo = true, requestAudio = true)
+        }
         viewModelScope.launch {
             stopStream.emit(false)
+        }
+    }
+
+    private fun getRtspStatusListener(): RtspSurfaceView.RtspStatusListener {
+        return object : RtspSurfaceView.RtspStatusListener {
+            override fun onRtspFirstFrameRendered() {
+                viewModelScope.launch {
+                    stopStream.emit(false)
+                }
+            }
+
+            override fun onRtspStatusConnected() {
+                viewModelScope.launch {
+                    stopStream.emit(false)
+                }
+            }
+
+            override fun onRtspStatusConnecting() {
+
+            }
+
+            override fun onRtspStatusDisconnected() {
+                viewModelScope.launch {
+                    stopStream.emit(true)
+                }
+            }
+
+            override fun onRtspStatusFailed(message: String?) {
+                viewModelScope.launch {
+                    stopStream.emit(true)
+                }
+            }
+
+            override fun onRtspStatusFailedUnauthorized() {
+                viewModelScope.launch {
+                    stopStream.emit(true)
+                }
+            }
+
         }
     }
 

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -62,7 +61,6 @@ class ConnectToBroadcast : Fragment() {
                 )
                 .onEach { rtsp ->
                     if (rtsp.isNotEmpty()) {
-                        Toast.makeText(requireContext(), rtsp, Toast.LENGTH_LONG).show()
                         viewModel.initSurfaceView(binding.streamVideo, rtsp)
                     }
                 }
@@ -73,9 +71,14 @@ class ConnectToBroadcast : Fragment() {
                     Lifecycle.State.STARTED
                 )
                 .onEach { stop ->
-                    if (stop) {
-                        binding.streamVideo.apply {
-                            stop() //TODO когда на той стороне нажали остановить трансляцию
+                    binding.apply {
+                        if (stop) { //TODO когда на той стороне нажали остановить трансляцию или проблема с соединением
+                                streamVideo.stop()
+                                myIp.visibility = View.VISIBLE
+                                connectionCode.visibility = View.VISIBLE
+                        } else {
+                            myIp.visibility = View.GONE
+                            connectionCode.visibility = View.GONE
                         }
                     }
                 }

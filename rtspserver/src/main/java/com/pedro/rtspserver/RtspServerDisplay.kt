@@ -40,9 +40,6 @@ open class RtspServerDisplay(
         rtspServer.sampleRate = sampleRate
     }
 
-    override fun startStreamRtp(url: String) { //unused
-    }
-
     override fun stopStreamRtp() {
         rtspServer.stopServer()
     }
@@ -66,12 +63,15 @@ open class RtspServerDisplay(
         rtspServer.setLogs(enable)
     }
 
-    override fun setCheckServerAlive(enable: Boolean) {
-    }
-
     /**
      * Unused functions
      */
+    override fun startStreamRtp(url: String) { //Todo нужно переписать, разбить на меньшие интерфейсы
+    }
+
+    override fun setCheckServerAlive(enable: Boolean) {
+    }
+
     @Throws(RuntimeException::class)
     override fun resizeCache(newSize: Int) {
     }

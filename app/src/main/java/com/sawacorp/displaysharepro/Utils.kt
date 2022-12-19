@@ -1,5 +1,6 @@
 package com.sawacorp.displaysharepro
 
+import android.content.res.Resources
 import android.os.Build
 import io.jsonwebtoken.lang.Strings.capitalize
 import java.net.Inet4Address
@@ -32,4 +33,12 @@ fun deleteSymbolsAfterLastDot(str: String): String {
 
 fun getMyDeviceName(): String {
     return capitalize(Build.MANUFACTURER) + " " + Build.MODEL
+}
+
+fun getScreenWidth(): Int {
+    return Resources.getSystem().displayMetrics.widthPixels
+}
+
+fun getScreenHeight(): Int {
+    return Resources.getSystem().displayMetrics.heightPixels
 }
