@@ -16,7 +16,7 @@ import com.sawacorp.displaysharepro.getScreenHeight
 import com.sawacorp.displaysharepro.getScreenWidth
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 fun startHttpServer(
@@ -24,7 +24,6 @@ fun startHttpServer(
     androidServer: AndroidServer,
     connectionCode: String,
     clientDao: ClientDao,
-    viewModelScope: CoroutineScope,
     onRtspUrl: (String) -> Unit,
     stopStream: () -> Unit
 ) {
@@ -34,13 +33,13 @@ fun startHttpServer(
             response.setBodyText(getMyDeviceName())
         }
         .post("/connect") { request, response: Response ->
-            createClient(request, clientDao, connectionCode, response, viewModelScope)
+            createClient(request, clientDao, connectionCode, response)
         }
         .post("/stream") { request, response: Response ->
             val token = request.header("token")
             val requestObject = Gson().fromJson(request.content(), RTSPRequest::class.java)
-
             val rtspUrl = requestObject.rtsp
+
             if (token != null && rtspUrl != null) {
                 val client = clientDao.getByToken(token)
                 if (client != null) {
@@ -85,8 +84,7 @@ fun createClient(
     request: Request,
     clientDao: ClientDao,
     code: String,
-    response: Response,
-    viewModelScope: CoroutineScope
+    response: Response
 ): Response {
     val requestBody = request.content()
     val requestObject = Gson().fromJson(requestBody, ConnectRequest::class.java)
@@ -99,7 +97,9 @@ fun createClient(
             .compact()
 
         val client = Client(device = requestObject.device, token = compactJws)
-        viewModelScope.launch { clientDao.insert(client) }
+        MainScope().launch {
+            clientDao.insert(client)
+        }
         response.setStatus(200)
         response.setBodyText(jsonWithSuccessToken(compactJws, getScreenWidth(), getScreenHeight()))
     }

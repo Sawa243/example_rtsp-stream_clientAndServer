@@ -25,14 +25,16 @@
         app:layout_constraintTop_toBottomOf="@id/my_ip"
         tools:text="Connection code:" />
 
-    <com.alexvas.rtsp.widget.RtspSurfaceView
-        android:id="@+id/stream_video"
+    <com.google.android.exoplayer2.ui.StyledPlayerView
+        android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/connection_code" />
+        app:layout_constraintTop_toBottomOf="@id/connection_code"
+        app:resize_mode="fill"
+        app:use_controller="false" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

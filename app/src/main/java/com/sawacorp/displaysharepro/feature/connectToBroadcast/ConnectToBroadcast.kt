@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -41,18 +42,11 @@ class ConnectToBroadcast : Fragment() {
     }
 
     private fun initData() {
+
         binding.myIp.text = "Сервер IP：${getMyIpV4Ip()}:${viewModel.port}"
+        binding.connectionCode.text = "Код для соединения: ${viewModel.code}"
 
         viewLifecycleOwner.lifecycleScope.launch {
-
-            viewModel.connectionCode.flowWithLifecycle(
-                viewLifecycleOwner.lifecycle,
-                Lifecycle.State.STARTED
-            ).onEach {
-                val code = it.joinToString("")
-                binding.connectionCode.text = "Код для соединения: $code"
-                viewModel.startHttpServer(code)
-            }.launchIn(this)
 
             viewModel.rtspString
                 .flowWithLifecycle(
@@ -61,21 +55,22 @@ class ConnectToBroadcast : Fragment() {
                 )
                 .onEach { rtsp ->
                     if (rtsp.isNotEmpty()) {
-                        viewModel.initSurfaceView(binding.streamVideo, rtsp)
+                        Toast.makeText(requireContext(), rtsp, Toast.LENGTH_LONG).show()
+                        viewModel.initExoPlayerView(binding.playerView, rtsp)
                     }
                 }
                 .launchIn(this)
-            viewModel.stopStream
+            viewModel.activeStream
                 .flowWithLifecycle(
                     viewLifecycleOwner.lifecycle,
                     Lifecycle.State.STARTED
                 )
-                .onEach { stop ->
+                .onEach { active ->
                     binding.apply {
-                        if (stop) { //TODO когда на той стороне нажали остановить трансляцию или проблема с соединением
-                                streamVideo.stop()
-                                myIp.visibility = View.VISIBLE
-                                connectionCode.visibility = View.VISIBLE
+                        if (!active) { //TODO когда на той стороне нажали остановить трансляцию или проблема с соединением
+                            myIp.visibility = View.VISIBLE
+                            connectionCode.visibility = View.VISIBLE
+                            viewModel.stopPlayer()
                         } else {
                             myIp.visibility = View.GONE
                             connectionCode.visibility = View.GONE

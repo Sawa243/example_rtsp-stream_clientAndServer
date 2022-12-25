@@ -23,8 +23,8 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "AppDatabase"
-                )
-                    .build()
+                ).build()
+
                 INSTANCE = instance
                 return instance
             }
