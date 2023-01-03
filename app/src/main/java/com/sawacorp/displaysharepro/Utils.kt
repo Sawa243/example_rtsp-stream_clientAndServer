@@ -42,3 +42,7 @@ fun getScreenWidth(): Int {
 fun getScreenHeight(): Int {
     return Resources.getSystem().displayMetrics.heightPixels
 }
+
+fun Int.toDp(): Int {
+    return (this * Resources.getSystem().displayMetrics.density).toInt()
+}

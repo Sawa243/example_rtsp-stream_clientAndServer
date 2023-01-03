@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.exoplayer2.ui.StyledPlayerView
+        android:id="@+id/player_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:resize_mode="fill"
+        app:use_controller="false" />
+
+    <ImageView
+        android:id="@+id/image_resize"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="end|bottom"
+        android:background="@color/white"
+        android:elevation="2dp"
+        android:padding="4dp"
+        android:src="@drawable/ic_resize_icon"
+        app:tint="@color/black" />
+
+    <ImageView
+        android:id="@+id/image_close_pip"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="start|bottom"
+        android:background="@color/white"
+        android:elevation="2dp"
+        android:padding="4dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:tint="@color/black" />
+
+    <View
+        android:id="@+id/touch_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="1dp" />
+
+</FrameLayout>

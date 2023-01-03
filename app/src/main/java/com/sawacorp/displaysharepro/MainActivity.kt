@@ -50,10 +50,25 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:$packageName")
-                //Uri.parse("package:${BuildConfig.APPLICATION_ID}")
             )
             startActivity(intent)
         }
+
+        /*val textView = TextView(this).apply {
+            text = "window"
+            textSize = 18f
+            setTextColor(Color.BLACK)
+            setBackgroundColor(Color.TRANSPARENT)
+        }
+        val parent = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT, PixelFormat.TRANSLUCENT )
+        parent.type = WindowManager.LayoutParams.TYPE_APPLICATION
+        parent.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        parent.gravity = Gravity.TOP or Gravity.RIGHT
+        parent.x = 0
+        parent.y = 100
+        windowManager.addView(textView, parent)*/
     }
 
 }

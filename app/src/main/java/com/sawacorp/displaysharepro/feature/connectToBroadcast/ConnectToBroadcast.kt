@@ -11,7 +11,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.sawacorp.displaysharepro.databinding.FragmentConnectToBroadcastBinding
-import com.sawacorp.displaysharepro.getMyIpV4Ip
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -43,9 +42,6 @@ class ConnectToBroadcast : Fragment() {
 
     private fun initData() {
 
-        binding.myIp.text = "Сервер IP：${getMyIpV4Ip()}:${viewModel.port}"
-        binding.connectionCode.text = "Код для соединения: ${viewModel.code}"
-
         viewLifecycleOwner.lifecycleScope.launch {
 
             viewModel.rtspString
@@ -56,7 +52,7 @@ class ConnectToBroadcast : Fragment() {
                 .onEach { rtsp ->
                     if (rtsp.isNotEmpty()) {
                         Toast.makeText(requireContext(), rtsp, Toast.LENGTH_LONG).show()
-                        viewModel.initExoPlayerView(binding.playerView, rtsp)
+                        binding.rtspPlayerView.initExoPlayerView(rtsp)
                     }
                 }
                 .launchIn(this)
@@ -68,17 +64,20 @@ class ConnectToBroadcast : Fragment() {
                 .onEach { active ->
                     binding.apply {
                         if (!active) { //TODO когда на той стороне нажали остановить трансляцию или проблема с соединением
-                            myIp.visibility = View.VISIBLE
-                            connectionCode.visibility = View.VISIBLE
-                            viewModel.stopPlayer()
-                        } else {
-                            myIp.visibility = View.GONE
-                            connectionCode.visibility = View.GONE
+                            binding.rtspPlayerView.stopPlayer()
                         }
                     }
                 }
                 .launchIn(this)
-
+            binding.rtspPlayerView.activeStream
+                .flowWithLifecycle(
+                    viewLifecycleOwner.lifecycle,
+                    Lifecycle.State.STARTED
+                )
+                .onEach { active ->
+                    viewModel.setActiveStream(active)
+                }
+                .launchIn(this)
         }
 
     }

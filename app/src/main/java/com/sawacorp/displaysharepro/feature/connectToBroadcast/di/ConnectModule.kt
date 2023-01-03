@@ -44,5 +44,4 @@ class ConnectModule {
     @Singleton
     fun providesActiveStreamStorage(
     ) = ActiveStreamStorage()
-
 }
